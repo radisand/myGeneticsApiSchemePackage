@@ -27,7 +27,7 @@ class MyGeneticsApiAuthMiddleware
         
         /**ms token */
         if($request -> hasHeader("X-Auth-Token") === false){
-            throw new AuthServiceNotProvidedTokenException("Authorization token was not provided!");
+            throw new AuthServiceNotProvidedTokenException("X-Auth-Token token was not provided!");
         }
 
         $accessToken = Config::get("app.mssAccessToken");
