@@ -19,7 +19,7 @@ class MyGeneticsApiAuthMiddleware
        
         
         /**if client token exists , then provide request next for client validation token*/
-        if($request -> header("Authorization")){
+        if($request -> hasHeader("Authorization")){
             return $next($request); 
         }
 
@@ -28,7 +28,7 @@ class MyGeneticsApiAuthMiddleware
         $accessToken = Config::get("app.mssAccessToken");
         $incomeAuthToken = $request -> header("X-Auth-Token");
 
-        if($accessToken !== $incomeAuthToken && isset($incomeAuthToken)){
+        if($accessToken !== $incomeAuthToken || is_null($incomeAuthToken)){
             throw new AuthServiceInvalidException("The auth service token is invalid!");
         }    
 
