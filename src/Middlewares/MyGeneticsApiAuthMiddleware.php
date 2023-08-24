@@ -5,6 +5,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceInvalidException;
+use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceNotProvidedTokenException;
 use Symfony\Component\HttpFoundation\Response;
 
 class MyGeneticsApiAuthMiddleware
@@ -19,16 +20,21 @@ class MyGeneticsApiAuthMiddleware
        
         
         /**if client token exists , then provide request next for client validation token*/
-        if($request -> hasHeader("Authorization")){
+        if($request -> hasHeader("Authorization") === true){
             return $next($request); 
         }
 
         
         /**ms token */
+        if($request -> hasHeader("X-Auth-Token") === false){
+            throw new AuthServiceNotProvidedTokenException("Authorization token was not provided!");
+        }
+
         $accessToken = Config::get("app.mssAccessToken");
         $incomeAuthToken = $request -> header("X-Auth-Token");
 
-        if($accessToken !== $incomeAuthToken || is_null($incomeAuthToken)){
+
+        if($accessToken !== $incomeAuthToken || $incomeAuthToken === "" || is_null($incomeAuthToken)){
             throw new AuthServiceInvalidException("The auth service token is invalid!");
         }    
 
