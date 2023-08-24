@@ -24,6 +24,6 @@ class MyGeneticsApiAuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this -> app['router'] -> aliasMiddleware('authMsCheck', MyGeneticsApiAuthMiddleware::class);
+        $this -> app['router'] -> aliasMiddleware('auth_ms_check', MyGeneticsApiAuthMiddleware::class);
     }
 }
