@@ -23,7 +23,7 @@ class MyGeneticsApiAuthMiddleware
         /** front client vie traefik*/
         if($request -> hasHeader('X-Forwarded-By') === true) 
         {
-            if($request -> hasHeader("Authorization") === false){
+            if(is_null($request -> cookie("accessToken"))){
                 throw new AuthServiceClientNotProvideTokenException('Authorization client token was not provided!');
             }
 
