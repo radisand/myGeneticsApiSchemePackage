@@ -4,6 +4,7 @@ namespace Radisand\ApiGeneralSchemeMyGenetics;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceClientNotProvideTokenException;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceInvalidException;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceNotProvidedTokenException;
 use Radisand\ApiGeneralSchemeMyGenetics\MyGeneticsResponseSchemeTrait;
@@ -82,7 +83,11 @@ class MyGeneticsApiHandler extends Handler
             {
                 $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
                 $e instanceof NotFoundHttpException => $this -> routeNotFoundException($e, $request),
-                $e instanceof AuthServiceInvalidException || $e instanceof AuthServiceNotProvidedTokenException => $this -> authMsExceptionHandler($e, $request),
+                
+                   $e instanceof AuthServiceInvalidException 
+                || $e instanceof AuthServiceNotProvidedTokenException 
+                || $e instanceof AuthServiceClientNotProvideTokenException => $this -> authMsExceptionHandler($e, $request),
+                
                 default => $appplicationMode === 'production' 
                     ? $this -> responseError(Response::HTTP_INTERNAL_SERVER_ERROR, null , 'Internal server error!') 
                     : $this -> responseError(Response::HTTP_INTERNAL_SERVER_ERROR, [
