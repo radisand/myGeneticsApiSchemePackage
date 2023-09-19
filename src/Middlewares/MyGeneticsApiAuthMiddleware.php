@@ -4,6 +4,7 @@ namespace Radisand\ApiGeneralSchemeMyGenetics\Middlewares;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceClientNotProvideTokenException;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceInvalidException;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceNotProvidedTokenException;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,8 +20,13 @@ class MyGeneticsApiAuthMiddleware
     {
        
         
-        /**if client token exists , then provide request next for client validation token*/
-        if($request -> hasHeader("Authorization") === true){
+        /** front client vie traefik*/
+        if($request -> hasHeader('X-Forwarded-By') === true) 
+        {
+            if($request -> hasHeader("Authorization") === false){
+                throw new AuthServiceClientNotProvideTokenException('Authorization client token was not provided!');
+            }
+
             return $next($request); 
         }
 
