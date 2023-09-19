@@ -83,10 +83,7 @@ class MyGeneticsApiHandler extends Handler
             {
                 $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
                 $e instanceof NotFoundHttpException => $this -> routeNotFoundException($e, $request),
-                
-                   $e instanceof AuthServiceInvalidException 
-                || $e instanceof AuthServiceNotProvidedTokenException 
-                || $e instanceof AuthServiceClientNotProvideTokenException => $this -> authMsExceptionHandler($e, $request),
+                $e instanceof AuthServiceInvalidException || $e instanceof AuthServiceNotProvidedTokenException || $e instanceof AuthServiceClientNotProvideTokenException => $this -> authMsExceptionHandler($e),
                 
                 default => $appplicationMode === 'production' 
                     ? $this -> responseError(Response::HTTP_INTERNAL_SERVER_ERROR, null , 'Internal server error!') 
@@ -104,11 +101,11 @@ class MyGeneticsApiHandler extends Handler
     /**
      * invalid auth between microservices
      * 
-     * @param  AuthServiceInvalidException|AuthServiceNotProvidedTokenException  $e
+     * @param  AuthServiceInvalidException|AuthServiceNotProvidedTokenException|AuthServiceClientNotProvideTokenException  $e
      * @param  \Illuminate\Http\Request  $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function authMsExceptionHandler(AuthServiceInvalidException|AuthServiceNotProvidedTokenException $e, $request)
+    protected function authMsExceptionHandler(AuthServiceInvalidException|AuthServiceNotProvidedTokenException|AuthServiceClientNotProvideTokenException $e)
     {
         return $this -> responseError(
             $e -> codeException,
