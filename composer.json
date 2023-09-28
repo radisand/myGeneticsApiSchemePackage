@@ -2,7 +2,7 @@
     "name": "radisand/api-general-scheme-mygenetics",
     "description": "the general api scheme (responses for all microservices, sync http requests between microservices, exception handler)",
     "type": "library",
-    "version": "1.2.8",  
+    "version": "1.2.9",  
     "autoload": {
         "psr-4": {
             "Radisand\\ApiGeneralSchemeMyGenetics\\": "src/"

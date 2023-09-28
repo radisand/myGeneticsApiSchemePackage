@@ -133,7 +133,7 @@ class MyGeneticsHttpClient
     protected function defaultHeaders() : array
     {
         return [
-            'Authorization' => $this-> getAccessToken(),
+            'X-Auth-Token' => $this-> getAccessToken(),
             'Accept' => 'application/json',
         ];
     }
