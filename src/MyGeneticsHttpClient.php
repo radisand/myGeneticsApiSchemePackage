@@ -79,7 +79,7 @@ class MyGeneticsHttpClient
             ? [...($this -> defaultHeaders()), ...$optionalHeaders] 
             : $this -> defaultHeaders();
         
-        $response = Http::withHeaders($headers) -> send($method, "https://$endPoint", $data);
+        $response = Http::withHeaders($headers) -> send($method, $endPoint, $data);
 
        
         $this -> validateResponse($response);
