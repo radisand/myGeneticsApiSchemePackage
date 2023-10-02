@@ -9,6 +9,7 @@ use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceInvalidException;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\AuthServiceNotProvidedTokenException;
 use Radisand\ApiGeneralSchemeMyGenetics\MyGeneticsResponseSchemeTrait;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
 class MyGeneticsApiHandler extends Handler
@@ -83,8 +84,9 @@ class MyGeneticsApiHandler extends Handler
             {
                 $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
                 $e instanceof NotFoundHttpException => $this -> routeNotFoundException($e, $request),
+                $e instanceof MethodNotAllowedHttpException => $this -> methodNotAllowedException($e, $request),
                 $e instanceof AuthServiceInvalidException || $e instanceof AuthServiceNotProvidedTokenException || $e instanceof AuthServiceClientNotProvideTokenException => $this -> authMsExceptionHandler($e),
-                
+    
                 default => $appplicationMode === 'production' 
                     ? $this -> responseError(Response::HTTP_INTERNAL_SERVER_ERROR, null , 'Internal server error!') 
                     : $this -> responseError(Response::HTTP_INTERNAL_SERVER_ERROR, [
@@ -125,6 +127,23 @@ class MyGeneticsApiHandler extends Handler
     {
         return $this -> responseError(
             Response::HTTP_NOT_FOUND,
+            null, 
+            $e -> getMessage(),
+        );
+    }
+
+
+     /**
+     * Create a response object from the not allowed method exception.
+     * 
+     * @param  \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException  $e
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function methodNotAllowedException(MethodNotAllowedHttpException $e , $request)
+    {
+        return $this -> responseError(
+            Response::HTTP_METHOD_NOT_ALLOWED,
             null, 
             $e -> getMessage(),
         );
