@@ -21,7 +21,7 @@ class MyGeneticsApiAuthMiddleware
        
         
         /** front client vie traefik*/
-        if(!$request -> header('X-Forwarded-By')) 
+        if($request -> header('X-Forwarded-By')) 
         {
             if(is_null($request -> cookie("accessToken")))
             {
