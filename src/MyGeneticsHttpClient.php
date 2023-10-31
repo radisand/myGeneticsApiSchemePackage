@@ -7,6 +7,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Radisand\ApiGeneralSchemeMyGenetics\Exceptions\InternalApiFetchErrorException;
+use Illuminate\Support\Str;
 
 class MyGeneticsHttpClient 
 {
@@ -17,6 +18,11 @@ class MyGeneticsHttpClient
      */
     protected string $accessToken;
 
+    /**
+     * pattern for mss general url
+     * @var string $patternMss
+     */
+    protected string $patternMss;
 
         
     /**
@@ -27,6 +33,7 @@ class MyGeneticsHttpClient
     public function __construct()
     {
         $this -> accessToken = Config::get("app.mssAccessToken");
+        $this -> patternMss = Config::get("app.patternMss");
     }
 
          
@@ -34,7 +41,7 @@ class MyGeneticsHttpClient
     /**
      * multi parallel request for diff endpoints at one time
      * 
-     * @param array<string> $requests ["method" => "", "url" => "", "data" => "", "headers" => ""]
+     * @param array<int,mixed[]> $requests ["method" => "", "url" => "", "data" => "", "headers" => ""]
      * @return array
      */
     public function parallelRequest(array $requests) : array
@@ -64,7 +71,7 @@ class MyGeneticsHttpClient
      * sendRequest for external API
      *
      * @param  string $method request method
-     * @param  string $endPoint method uri
+     * @param  string $endPoint service name
      * @param  array<mixed> $data additional data with request
      * @param  array<string> $headers optional headers
      * @param callable|null $closure $closure(\Illuminate\Http\Client\Response $response) - to handle response 
@@ -79,8 +86,17 @@ class MyGeneticsHttpClient
             ? [...($this -> defaultHeaders()), ...$optionalHeaders] 
             : $this -> defaultHeaders();
         
-        $response = Http::withHeaders($headers) -> send($method, $endPoint, $data);
+        $stmt = Http::withHeaders($headers); 
+        $endPoint = Str::replace('*' , $endPoint, $this -> getPatternMss());
 
+        $response = match(Str::lower($method))
+        {
+            'get' => $stmt -> get($endPoint, $data),
+            'put' => $stmt -> put($endPoint, $data),
+            'delete' => $stmt -> delete($endPoint, $data),
+            'patch' => $stmt -> patch($endPoint , $data),
+            default => $stmt -> post($endPoint, $data),
+        };
        
         $this -> validateResponse($response);
 
@@ -90,7 +106,7 @@ class MyGeneticsHttpClient
         }
 
         
-        return json_decode($response -> body(), true);
+        return $response -> json();
         
     }
 
@@ -101,7 +117,7 @@ class MyGeneticsHttpClient
      */ 
     protected function getAccessToken() : string
     {
-        return $this->accessToken;
+        return $this -> accessToken;
     }
 
 
@@ -115,7 +131,8 @@ class MyGeneticsHttpClient
     protected function validateResponse(Response $response) : void
     {
         
-        if ($response->successful() === false) {
+        if ($response -> successful() === false) 
+        {
             throw new InternalApiFetchErrorException(
                 $response -> body()
             );    
@@ -138,4 +155,14 @@ class MyGeneticsHttpClient
         ];
     }
    
+
+    /**
+     * Get $patternMss
+     *
+     * @return  string
+     */ 
+    protected function getPatternMss() : string
+    {
+        return $this -> patternMss;
+    }
 }
